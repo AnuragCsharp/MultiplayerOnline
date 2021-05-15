@@ -4399,7 +4399,7 @@ PrefabInstance:
       objectReference: {fileID: 297272814}
     - target: {fileID: 1303994066553172976, guid: 363a6a6970ddf1f45af2ac5f7b4b65fa, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: QuitGame
+      value: QuickJoin
       objectReference: {fileID: 0}
     - target: {fileID: 1303994066553172976, guid: 363a6a6970ddf1f45af2ac5f7b4b65fa, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName

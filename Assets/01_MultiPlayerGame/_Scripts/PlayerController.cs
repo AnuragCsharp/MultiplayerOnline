@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : PunBehaviour
 {
 	public Transform _viewPoint;
 	private float _verticalRotation;
@@ -64,173 +65,176 @@ public class PlayerController : MonoBehaviour
 		UIController.instance.weaponTempSlider.maxValue = maxHeat;
 
 		SwitchGuns();
-
+		
+		//Without Network Spwan use below else comment it
+		
+		/*
 		Transform NewPosition = SpwanManager.instance.GetSpwanPoint();
-
-
 		this.transform.position = NewPosition.position;
-		this.transform.rotation = NewPosition.rotation;
+		this.transform.rotation = NewPosition.rotation; */
 	}
 
 
 
 	private void Update()
 	{
-
-		// Get the Mouse axis and assign to Vector2 MouseINput
-		mouseInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
-
-		//Apply the rotation to player Based on Mouse Inputs X axis
-		this.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y +  mouseInput.x,transform.rotation.eulerAngles.z);
-
-		//Look up and down based on Player VIewPoint + Clamp the look to 60 Degrees..
-
-		_verticalRotation += mouseInput.y; //to Avoid Wierd Clamp Behaviour we are setting a vertical Roation
-
-		_verticalRotation = Mathf.Clamp(_verticalRotation, -60f,60f);
-
-		_viewPoint.rotation = Quaternion.Euler(-_verticalRotation,_viewPoint.rotation.eulerAngles.y ,_viewPoint.rotation.eulerAngles.z);
-
-
-		//TO move the PLayer
-		_moveDirection = new Vector3(Input.GetAxisRaw("Horizontal"),0,Input.GetAxisRaw("Vertical"));
-
-		if (Input.GetKey(KeyCode.LeftShift)) // to check if player is running or moving 
+		if (photonView.isMine)
 		{
-			activeMoveSpeed = runSpeed;
-		}
-		else
-		{
-			activeMoveSpeed = moveSpeed;
-		}
+			// Get the Mouse axis and assign to Vector2 MouseINput
+			mouseInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
 
-		float yVel = _movement.y;
+			//Apply the rotation to player Based on Mouse Inputs X axis
+			this.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + mouseInput.x, transform.rotation.eulerAngles.z);
 
+			//Look up and down based on Player VIewPoint + Clamp the look to 60 Degrees..
 
-		_movement = ((transform.forward * _moveDirection.z) + (transform.right * _moveDirection.x)).normalized * activeMoveSpeed;
+			_verticalRotation += mouseInput.y; //to Avoid Wierd Clamp Behaviour we are setting a vertical Roation
 
-		
-		//If only player not in groud make the Y value increase to act like gravity
-		if (!characCol.isGrounded)
-		{
-			_movement.y = yVel;
-		}
+			_verticalRotation = Mathf.Clamp(_verticalRotation, -60f, 60f);
 
-		//to check if player is on ground layer or not
-		isGrounded = Physics.Raycast(groundCheckPoint.position,Vector3.down,0.25f,groudnLayers);
-
-		if (Input.GetButtonDown("Jump") && isGrounded)
-		{
-			_movement.y = jumpForce;
-		}
-
-		_movement.y += Physics.gravity.y * Time.deltaTime * gravitymod;
-
-		characCol.Move(_movement  * Time.deltaTime);
+			_viewPoint.rotation = Quaternion.Euler(-_verticalRotation, _viewPoint.rotation.eulerAngles.y, _viewPoint.rotation.eulerAngles.z);
 
 
-		if (allGuns[_selectedGun].Muzzle.activeInHierarchy)
-		{
-			_muzzleCounter -= Time.deltaTime;
+			//TO move the PLayer
+			_moveDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
 
-			if (_muzzleCounter <=0)
+			if (Input.GetKey(KeyCode.LeftShift)) // to check if player is running or moving 
 			{
-				//Deactivate the Muzzle
-				allGuns[_selectedGun].Muzzle.SetActive(false);
+				activeMoveSpeed = runSpeed;
 			}
-		
-		}
-		
-
-		//TO Shoot the Different Guns with Different Burst Mode
-
-		if (!_overHeated)
-		{
-
-
-
-			if (Input.GetMouseButtonDown(0))
+			else
 			{
-				Shoot();
+				activeMoveSpeed = moveSpeed;
 			}
 
-			if (Input.GetMouseButton(0) && allGuns[_selectedGun].isAutomatic)
-			{
-				shotCounter -= Time.deltaTime;
+			float yVel = _movement.y;
 
-				if (shotCounter <= 0)
+
+			_movement = ((transform.forward * _moveDirection.z) + (transform.right * _moveDirection.x)).normalized * activeMoveSpeed;
+
+
+			//If only player not in groud make the Y value increase to act like gravity
+			if (!characCol.isGrounded)
+			{
+				_movement.y = yVel;
+			}
+
+			//to check if player is on ground layer or not
+			isGrounded = Physics.Raycast(groundCheckPoint.position, Vector3.down, 0.25f, groudnLayers);
+
+			if (Input.GetButtonDown("Jump") && isGrounded)
+			{
+				_movement.y = jumpForce;
+			}
+
+			_movement.y += Physics.gravity.y * Time.deltaTime * gravitymod;
+
+			characCol.Move(_movement * Time.deltaTime);
+
+
+			if (allGuns[_selectedGun].Muzzle.activeInHierarchy)
+			{
+				_muzzleCounter -= Time.deltaTime;
+
+				if (_muzzleCounter <= 0)
+				{
+					//Deactivate the Muzzle
+					allGuns[_selectedGun].Muzzle.SetActive(false);
+				}
+
+			}
+
+
+			//TO Shoot the Different Guns with Different Burst Mode
+
+			if (!_overHeated)
+			{
+
+
+
+				if (Input.GetMouseButtonDown(0))
 				{
 					Shoot();
 				}
+
+				if (Input.GetMouseButton(0) && allGuns[_selectedGun].isAutomatic)
+				{
+					shotCounter -= Time.deltaTime;
+
+					if (shotCounter <= 0)
+					{
+						Shoot();
+					}
+				}
+
+				_heatCounter -= coolRate * Time.deltaTime;
 			}
 
-			_heatCounter -= coolRate * Time.deltaTime;
-		}
+			else
+			{
+				_heatCounter -= overHeatCoolRate * Time.deltaTime;
 
-		else
-		{
-			_heatCounter -= overHeatCoolRate * Time.deltaTime;
+				if (_heatCounter <= 0)
+				{
+					UIController.instance.overHeaterMessage.gameObject.SetActive(false);
+					_overHeated = false;
+				}
+			}
 
 			if (_heatCounter <= 0)
 			{
-				UIController.instance.overHeaterMessage.gameObject.SetActive(false);
-				_overHeated = false;
+				_heatCounter = 0;
 			}
-		}
 
-		if (_heatCounter<=0)
-		{
-			_heatCounter = 0;
-		}
-
-		UIController.instance.weaponTempSlider.value = _heatCounter;
+			UIController.instance.weaponTempSlider.value = _heatCounter;
 
 
-		//Gun Selecter
-		if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
-		{
-			
-			_selectedGun++;
-
-			if (_selectedGun >= allGuns.Length)
+			//Gun Selecter
+			if (Input.GetAxisRaw("Mouse ScrollWheel") > 0)
 			{
-				_selectedGun = 0;
-			}
-			SwitchGuns();
-		}
 
+				_selectedGun++;
 
-		else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
-		{
-			_selectedGun--;
-
-			if (_selectedGun < 0)
-			{
-				_selectedGun = allGuns.Length - 1;
-			}
-			SwitchGuns();
-		}
-
-		//Swich Guns Using Number Keys as well
-		for (int i = 0; i < allGuns.Length; i++)
-		{
-			if (Input.GetKeyDown((i+1).ToString()))
-			{
-				_selectedGun = i;
+				if (_selectedGun >= allGuns.Length)
+				{
+					_selectedGun = 0;
+				}
 				SwitchGuns();
 			}
-		}
 
 
-		if (Input.GetKeyDown(KeyCode.Escape))
-		{
-			Cursor.lockState = CursorLockMode.None;
-		}
-		else if (Cursor.lockState == CursorLockMode.None)
-		{
-			if (Input.GetMouseButtonDown(0))
+			else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
 			{
-				Cursor.lockState = CursorLockMode.Locked;
+				_selectedGun--;
+
+				if (_selectedGun < 0)
+				{
+					_selectedGun = allGuns.Length - 1;
+				}
+				SwitchGuns();
+			}
+
+			//Swich Guns Using Number Keys as well
+			for (int i = 0; i < allGuns.Length; i++)
+			{
+				if (Input.GetKeyDown((i + 1).ToString()))
+				{
+					_selectedGun = i;
+					SwitchGuns();
+				}
+			}
+
+
+			if (Input.GetKeyDown(KeyCode.Escape))
+			{
+				Cursor.lockState = CursorLockMode.None;
+			}
+			else if (Cursor.lockState == CursorLockMode.None)
+			{
+				if (Input.GetMouseButtonDown(0))
+				{
+					Cursor.lockState = CursorLockMode.Locked;
+				}
 			}
 		}
 	}
@@ -239,8 +243,13 @@ public class PlayerController : MonoBehaviour
 	{
 		//to make sure the Camera move smoothly ---
 
-		_Cam.transform.position = _viewPoint.position;
-		_Cam.transform.rotation = _viewPoint.rotation;
+		if (photonView.isMine)
+		{
+			_Cam.transform.position = _viewPoint.position;
+			_Cam.transform.rotation = _viewPoint.rotation;
+		}
+
+		
 
 	}
 
