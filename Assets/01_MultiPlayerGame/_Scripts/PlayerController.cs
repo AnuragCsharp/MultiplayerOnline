@@ -265,9 +265,24 @@ public class PlayerController : PunBehaviour
 	}
 
 	[PunRPC] //Remote Procedure Call -- This function will call on everyMachine
-	public void DealDamage()
+	public void DealDamage(string Damager)
 	{
-		Debug.Log("This is RPC Call");	
+
+		TakeDamage(Damager);
+
+	}
+
+	public void TakeDamage(string Damager)
+	{
+		if (photonView.isMine)
+		{
+			Debug.Log(photonView.owner.NickName + " have been hit by " + Damager);
+
+			PlayerSpwanner.intance.Die();
+			
+		}
+
+		
 	}
 
 
@@ -314,7 +329,7 @@ public class PlayerController : PunBehaviour
 				Debug.Log("HIt " + hit.collider.gameObject.GetPhotonView().name);
 				PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.identity,0);
 
-				hit.collider.gameObject.GetPhotonView().RPC("DealDamage", PhotonTargets.All );
+				hit.collider.gameObject.GetPhotonView().RPC("DealDamage",PhotonTargets.All , photonView.owner.NickName );
 			}
 			else
 			{

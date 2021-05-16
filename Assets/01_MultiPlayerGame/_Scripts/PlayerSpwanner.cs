@@ -32,4 +32,13 @@ public class PlayerSpwanner : PunBehaviour
 
 		_player =  PhotonNetwork.Instantiate(PlayerPrefab.name, SpwanPoint.position , SpwanPoint.rotation,0);
 	}
+
+
+	//this is Being called by Player Controller TakeDamage and on the Network for Individual Player
+	public void Die()
+	{
+		PhotonNetwork.Destroy(_player);
+
+		SpwanPlayer();
+	}
 }
