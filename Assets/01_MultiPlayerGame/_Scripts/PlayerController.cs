@@ -62,6 +62,8 @@ public class PlayerController : PunBehaviour
 
 	public GameObject playerModel;
 
+	public Transform modelGunPoint, gunHolder;
+
 
 	#region For Windows Build
 #if UNITY_STANDALONE_WIN
@@ -76,7 +78,9 @@ public class PlayerController : PunBehaviour
 
 		UIController.instance.weaponTempSlider.maxValue = maxHeat;
 
-		SwitchGuns();
+		//SwitchGuns();
+
+		photonView.RPC("SetGuns", PhotonTargets.All, _selectedGun);
 
 		_currentHealth = maxHealth;
 
@@ -86,6 +90,14 @@ public class PlayerController : PunBehaviour
 
 			UIController.instance.healthSlider.maxValue = maxHealth;
 			UIController.instance.healthSlider.value = _currentHealth;
+		}
+		else
+		{
+			gunHolder.parent = modelGunPoint;
+
+			gunHolder.localPosition = Vector3.zero;
+
+			gunHolder.localRotation = Quaternion.identity;
 		}
 		
 		//Without Network Spwan use below else comment it
@@ -240,7 +252,8 @@ public class PlayerController : PunBehaviour
 				{
 					_selectedGun = 0;
 				}
-				SwitchGuns();
+				//SwitchGuns();
+				photonView.RPC("SetGuns", PhotonTargets.All, _selectedGun);
 			}
 
 
@@ -252,7 +265,8 @@ public class PlayerController : PunBehaviour
 				{
 					_selectedGun = allGuns.Length - 1;
 				}
-				SwitchGuns();
+				//SwitchGuns();
+				photonView.RPC("SetGuns", PhotonTargets.All, _selectedGun);
 			}
 
 			//Swich Guns Using Number Keys as well
@@ -261,7 +275,8 @@ public class PlayerController : PunBehaviour
 				if (Input.GetKeyDown((i + 1).ToString()))
 				{
 					_selectedGun = i;
-					SwitchGuns();
+					//SwitchGuns();
+					photonView.RPC("SetGuns", PhotonTargets.All, _selectedGun);
 				}
 			}
 
@@ -344,6 +359,16 @@ public class PlayerController : PunBehaviour
 		allGuns[_selectedGun].Muzzle.SetActive(false);
 	}
 
+	[PunRPC]
+	public void SetGuns(int gunToSwitchTo )
+	{
+		if (gunToSwitchTo < allGuns.Length)
+		{
+			_selectedGun = gunToSwitchTo;
+
+			SwitchGuns();
+		}
+	}
 
 	private void Shoot()
 	{
