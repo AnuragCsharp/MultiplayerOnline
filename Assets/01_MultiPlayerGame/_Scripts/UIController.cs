@@ -11,6 +11,7 @@ public class UIController : MonoBehaviour
 
 	public Slider weaponTempSlider;
 
+	public Slider healthSlider;
 
 	public static UIController instance;
 

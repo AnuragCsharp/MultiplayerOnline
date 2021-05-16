@@ -57,8 +57,10 @@ public class PlayerController : PunBehaviour
 
 	private int _currentHealth;
 
-	
+	public Animator anim;
 
+
+	public GameObject playerModel;
 
 
 	#region For Windows Build
@@ -66,6 +68,8 @@ public class PlayerController : PunBehaviour
 
 	private void Start()
 	{
+		
+
 		Cursor.lockState = CursorLockMode.Locked;
 
 		_Cam = Camera.main;
@@ -73,6 +77,16 @@ public class PlayerController : PunBehaviour
 		UIController.instance.weaponTempSlider.maxValue = maxHeat;
 
 		SwitchGuns();
+
+		_currentHealth = maxHealth;
+
+		if (photonView.isMine)
+		{
+			playerModel.SetActive(false);
+
+			UIController.instance.healthSlider.maxValue = maxHealth;
+			UIController.instance.healthSlider.value = _currentHealth;
+		}
 		
 		//Without Network Spwan use below else comment it
 		
@@ -252,6 +266,10 @@ public class PlayerController : PunBehaviour
 			}
 
 
+			anim.SetBool("grounded", isGrounded);
+			anim.SetFloat("speed", _moveDirection.magnitude); //how far we moving and will get only positive number
+
+			
 			if (Input.GetKeyDown(KeyCode.Escape))
 			{
 				Cursor.lockState = CursorLockMode.None;
@@ -290,7 +308,7 @@ public class PlayerController : PunBehaviour
 				PlayerSpwanner.instance.Die(Damager);
 			}
 
-			
+			UIController.instance.healthSlider.value = _currentHealth;
 			
 		}
 
