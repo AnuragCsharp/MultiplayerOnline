@@ -8,4 +8,6 @@ public class Gun : MonoBehaviour
 	public bool isAutomatic;
 	public float timeBetweenShot = 0.1f, hearPerShot = 1f;
 	public GameObject Muzzle;
+
+	
 }

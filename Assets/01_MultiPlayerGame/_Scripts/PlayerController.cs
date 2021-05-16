@@ -51,6 +51,10 @@ public class PlayerController : PunBehaviour
 	private int _selectedGun;
 
 
+	public GameObject playerHitImpact;
+
+	
+
 
 
 	#region For Windows Build
@@ -155,28 +159,47 @@ public class PlayerController : PunBehaviour
 				if (Input.GetMouseButtonDown(0))
 				{
 					Shoot();
+					
 				}
 
 				if (Input.GetMouseButton(0) && allGuns[_selectedGun].isAutomatic)
 				{
 					shotCounter -= Time.deltaTime;
 
+					
+
 					if (shotCounter <= 0)
 					{
+
+
+						GameObject Go = GameObject.Find("weapon .001");
+						Go.GetComponent<Animator>().SetBool("Fire", true);
+										
+
 						Shoot();
+
+					
+
 					}
+
 				}
 
+
 				_heatCounter -= coolRate * Time.deltaTime;
+
+				
 			}
 
 			else
 			{
 				_heatCounter -= overHeatCoolRate * Time.deltaTime;
+				
 
 				if (_heatCounter <= 0)
 				{
+					
 					UIController.instance.overHeaterMessage.gameObject.SetActive(false);
+
 					_overHeated = false;
 				}
 			}
@@ -236,13 +259,23 @@ public class PlayerController : PunBehaviour
 					Cursor.lockState = CursorLockMode.Locked;
 				}
 			}
+
+			
 		}
 	}
+
+	[PunRPC] //Remote Procedure Call -- This function will call on everyMachine
+	public void DealDamage()
+	{
+		Debug.Log("This is RPC Call");	
+	}
+
+
 
 	private void LateUpdate() // will get call after Update
 	{
 		//to make sure the Camera move smoothly ---
-
+		//Photonvirw.ismine is for individual player to have their own COntroll
 		if (photonView.isMine)
 		{
 			_Cam.transform.position = _viewPoint.position;
@@ -276,11 +309,19 @@ public class PlayerController : PunBehaviour
 
 		if (Physics.Raycast( ray ,out RaycastHit hit))
 		{
-			Debug.Log("Name of the Object " + hit.collider.name );
+			if (hit.collider.gameObject.CompareTag("Player"))
+			{
+				Debug.Log("HIt " + hit.collider.gameObject.GetPhotonView().name);
+				PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.identity,0);
+			}
+			else
+			{
+				GameObject _BulletImpactObject = Instantiate(bulltImpact, hit.point + (hit.normal * 0.002f), Quaternion.LookRotation(hit.normal, Vector3.up));
 
-		  GameObject _BulletImpactObject =	Instantiate(bulltImpact, hit.point + (hit.normal * 0.002f), Quaternion.LookRotation(hit.normal,Vector3.up));
+				Destroy(_BulletImpactObject, 5f);
+			}
 
-			Destroy(_BulletImpactObject, 5f);
+		 
 		}
 
 		shotCounter = allGuns[_selectedGun].timeBetweenShot;
@@ -294,7 +335,14 @@ public class PlayerController : PunBehaviour
 
 			UIController.instance.overHeaterMessage.gameObject.SetActive(true);
 
+			GameObject.Find("weapon .001").GetComponent<Animator>().SetBool("Fire", false);
+
 			_overHeated = true;
+
+			GameObject Go = GameObject.Find("weapon .001");
+			Go.GetComponent<Animator>().SetBool("Fire", false);
+			
+		
 		}
 
 		allGuns[_selectedGun].Muzzle.SetActive(true);
