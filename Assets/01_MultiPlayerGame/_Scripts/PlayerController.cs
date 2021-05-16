@@ -313,6 +313,8 @@ public class PlayerController : PunBehaviour
 			{
 				Debug.Log("HIt " + hit.collider.gameObject.GetPhotonView().name);
 				PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.identity,0);
+
+				hit.collider.gameObject.GetPhotonView().RPC("DealDamage", PhotonTargets.All );
 			}
 			else
 			{
