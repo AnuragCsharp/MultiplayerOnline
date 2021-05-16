@@ -14,6 +14,12 @@ public class UIController : MonoBehaviour
 
 	public static UIController instance;
 
+	public GameObject deathScreen;
+
+	public TMP_Text deathNote;
+
+	public TMP_Text reSpwanningText;
+
 	private void Awake()
 	{
 	 instance = this;

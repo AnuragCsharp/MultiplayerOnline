@@ -145,6 +145,7 @@ MonoBehaviour:
   timeBetweenShot: 0.1
   hearPerShot: 1
   Muzzle: {fileID: 3686035362084700511}
+  shotDamage: 10
 --- !u!1 &4604372548988129877
 GameObject:
   m_ObjectHideFlags: 0
@@ -534,6 +535,7 @@ MonoBehaviour:
   timeBetweenShot: 0.1
   hearPerShot: 1
   Muzzle: {fileID: 3686035361838650516}
+  shotDamage: 25
 --- !u!1 &4604372549741498667
 GameObject:
   m_ObjectHideFlags: 0
@@ -583,6 +585,7 @@ MonoBehaviour:
   timeBetweenShot: 0.25
   hearPerShot: 1
   Muzzle: {fileID: 3686035362237075092}
+  shotDamage: 15
 --- !u!1 &4604372550186725823
 GameObject:
   m_ObjectHideFlags: 0

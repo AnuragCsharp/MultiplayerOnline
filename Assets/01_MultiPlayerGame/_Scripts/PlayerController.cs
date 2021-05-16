@@ -53,6 +53,10 @@ public class PlayerController : PunBehaviour
 
 	public GameObject playerHitImpact;
 
+	public int maxHealth=100;
+
+	private int _currentHealth;
+
 	
 
 
@@ -265,20 +269,28 @@ public class PlayerController : PunBehaviour
 	}
 
 	[PunRPC] //Remote Procedure Call -- This function will call on everyMachine
-	public void DealDamage(string Damager)
+	public void DealDamage(string Damager, int damageAmount)
 	{
 
-		TakeDamage(Damager);
+		TakeDamage(Damager , damageAmount);
 
 	}
 
-	public void TakeDamage(string Damager)
+	public void TakeDamage(string Damager, int damageAmount)
 	{
 		if (photonView.isMine)
 		{
-			Debug.Log(photonView.owner.NickName + " have been hit by " + Damager);
+			//Debug.Log(photonView.owner.NickName + " have been hit by " + Damager);
 
-			PlayerSpwanner.intance.Die();
+			_currentHealth -= damageAmount;
+
+			if (_currentHealth <=0)
+			{
+				_currentHealth = 0;
+				PlayerSpwanner.instance.Die(Damager);
+			}
+
+			
 			
 		}
 
@@ -329,7 +341,7 @@ public class PlayerController : PunBehaviour
 				Debug.Log("HIt " + hit.collider.gameObject.GetPhotonView().name);
 				PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.identity,0);
 
-				hit.collider.gameObject.GetPhotonView().RPC("DealDamage",PhotonTargets.All , photonView.owner.NickName );
+				hit.collider.gameObject.GetPhotonView().RPC("DealDamage",PhotonTargets.All , photonView.owner.NickName , allGuns[_selectedGun].shotDamage);
 			}
 			else
 			{

@@ -5,15 +5,19 @@ using Photon;
 
 public class PlayerSpwanner : PunBehaviour
 {
-	public static PlayerSpwanner intance;
+	public static PlayerSpwanner instance;
 
 	public GameObject PlayerPrefab;
 
 	private GameObject _player;
 
+	public GameObject deathEffectFx;
+
+	public float respwanTime =3f;
+
 	private void Awake()
 	{
-		intance = this;
+		instance = this;
 	}
 
 	private void Start()
@@ -35,9 +39,34 @@ public class PlayerSpwanner : PunBehaviour
 
 
 	//this is Being called by Player Controller TakeDamage and on the Network for Individual Player
-	public void Die()
+	public void Die(string Damager)
 	{
+		
+
+		UIController.instance.deathNote.text = "You Were Killed By " + Damager;
+
+		//PhotonNetwork.Destroy(_player);
+
+		//SpwanPlayer();
+
+		if (_player !=null)
+		{
+			StartCoroutine(DieCoroutine());
+		}
+	}
+
+
+	public IEnumerator DieCoroutine()
+	{
+		PhotonNetwork.Instantiate(deathEffectFx.name, _player.transform.position, Quaternion.identity, 0);
+
 		PhotonNetwork.Destroy(_player);
+
+		UIController.instance.deathScreen.SetActive(true);
+
+		yield return new WaitForSeconds(respwanTime);
+
+		UIController.instance.deathScreen.SetActive(false);
 
 		SpwanPlayer();
 	}
