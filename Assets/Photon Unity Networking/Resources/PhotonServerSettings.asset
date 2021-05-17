@@ -44,4 +44,5 @@ MonoBehaviour:
   - RequestForPickupTimes
   - TaggedPlayer
   - DealDamage
+  - SetGuns
   DisableAutoOpenWizard: 1

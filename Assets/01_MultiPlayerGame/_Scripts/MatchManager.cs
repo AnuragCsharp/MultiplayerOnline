@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon;
 using UnityEngine.SceneManagement;
+using Photon.Realtime;
+using ExitGames.Client.Photon;
 
-public class MatchManager : PunBehaviour
+
+public class MatchManager : PunBehaviour , IPunCallbacks 
 {
     public static MatchManager instance;
 
@@ -19,5 +22,26 @@ public class MatchManager : PunBehaviour
 		{
 			SceneManager.LoadScene(0); //Main Menu to be Loaded if it is not connected to Network;
 		}
+	}
+
+	void Update()
+	{
+
+	}
+
+	public void OnEvent(EventData photonEvent)
+	{
+
+	}
+
+	private void OnEnable()
+	{
+		PhotonNetwork.OnEventCall
+		
+	}
+
+	private void OnDisable()
+	{
+		
 	}
 }
