@@ -3,14 +3,16 @@
 //   Part of: Photon Unity Networking Demos
 // </copyright>
 // <summary>
-//  Used in PUN Basics Tutorial to connect, and join/create room automatically
+//  Used in DemoAnimator to connect, and join/create room automatically
 // </summary>
 // <author>developer@exitgames.com</author>
 // --------------------------------------------------------------------------------------------------------------------
 
-using UnityEngine;
 
-namespace Photon.Pun.Demo.PunBasics
+using UnityEngine;
+using System.Collections;
+
+namespace ExitGames.Demos.DemoAnimator
 {
 	/// <summary>
 	/// Simple behaviour to animate particles around to create a typical "Ajax Loader". this is actually very important to visual inform the user that something is happening

@@ -8,15 +8,17 @@
 // <author>developer@exitgames.com</author>
 // --------------------------------------------------------------------------------------------------------------------
 
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
+using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
-using Photon.Pun.Demo.Cockpit;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-namespace Photon.Pun.Demo.Hub
+using UnityEngine.SceneManagement;
+
+namespace ExitGames.Demos
 {
 	public class DemoHubManager : MonoBehaviour {
 
@@ -27,7 +29,7 @@ namespace Photon.Pun.Demo.Hub
 		public GameObject OpenTutorialLinkButton;
 		public GameObject OpenDocLinkButton;
 
-        string MainDemoWebLink = "https://doc.photonengine.com/en-us/pun/v2/getting-started/pun-intro";
+        string MainDemoWebLink = "http://bit.ly/2f8OFu8";
 
 		struct DemoData
 		{
@@ -44,9 +46,7 @@ namespace Photon.Pun.Demo.Hub
 
 		// Use this for initialization
 		void Awake () {
-
-			PunCockpit.Embedded = false;
-
+		
 			OpenSceneButton.SetActive(false);
 			
 			OpenTutorialLinkButton.SetActive(false);
@@ -105,8 +105,8 @@ namespace Photon.Pun.Demo.Hub
 						"New Unity UI all around, for Menus and player health HUD.\n" +
 						"Full step by step tutorial available online.",
 				Scene = "PunBasics-Launcher" ,
-				TutorialLink = "https://doc.photonengine.com/en-us/pun/v2/demos-and-tutorials/pun-basics-tutorial/intro"
-                }
+				TutorialLink = "http://j.mp/2dibZIM"
+				}
 			);
 			
 			_data.Add(
@@ -130,7 +130,7 @@ namespace Photon.Pun.Demo.Hub
 					"Implements item pickup with RPCs.\n" +
 					"Uses Custom Properties for Teams.\n" +
 					"Counts score per player and team.\n" +
-					"Uses Player extension methods for easy Custom Property access.",
+					"Uses PhotonPlayer extension methods for easy Custom Property access.",
 				Scene = "DemoPickup-Scene"
 				}
 			);
@@ -140,13 +140,13 @@ namespace Photon.Pun.Demo.Hub
 				new DemoData()
 				{
 				Title = "Chat",
-				Description = "Uses the Chat API.\n" +
+				Description = "Uses the Chat API (now part of PUN).\n" +
 					"Simple UI.\n" +
 					"You can enter any User ID.\n" +
 					"Automatically subscribes some channels.\n" +
 					"Allows simple commands via text.\n" +
 					"\n" +
-					"Requires configuration of Chat App ID in ServerSettings.",
+					"Requires configuration of Chat App ID in scene.",
 						Scene = "DemoChat-Scene",
 						DocLink = "http://j.mp/2iwQkPJ" 
 				}
@@ -211,51 +211,7 @@ namespace Photon.Pun.Demo.Hub
 				Scene = "DemoRPS-Scene"
 				}
 			);
-
-			_data.Add(
-				"Asteroids", 
-				new DemoData()
-				{
-					Title = "Asteroids",
-					Description = "Simple asteroid game based on the Unity learning asset.\n",
-					Scene = "DemoAsteroids-LobbyScene"
-				}
-			);
-
-			_data.Add(
-				"SlotRacer", 
-				new DemoData()
-				{
-					Title = "Slot Racer",
-					Description = "Simple SlotRacing game.\n",
-					Scene = "SlotCar-Scene"
-				}
-			);
-
-
-			_data.Add(
-				"LoadBalancing", 
-				new DemoData()
-				{
-					Title = "Load Balancing",
-					Description = "Shows how to use the raw LoadBalancing system.\n" +
-						"\n" +
-						"This is a simple test scene to connect and join a random room, without using PUN but the actual LoadBalancing api only",
-					Scene = "DemoLoadBalancing-Scene"
-				}
-			);
-
-			_data.Add(
-				"PunCockpit", 
-					new DemoData()
-					{
-						Title = "Cockpit",
-						Description = "Controls most aspect of PUN.\n" +
-							"Connection, Lobby, Room access, Player control",
-					Scene = "PunCockpit-Scene"
-					}
-			);
-        }
+		}
 
 		public void SelectDemo(string Reference)
 		{
@@ -306,6 +262,13 @@ namespace Photon.Pun.Demo.Hub
 		public void OpenMainWebLink()
 		{
 			Application.OpenURL(MainDemoWebLink);
+		}
+
+		// Fixes the annoying issue described here: http://forum.unity3d.com/threads/158676-!dest-m_MultiFrameGUIState-m_NamedKeyControlList/page2
+		Rect BugFixbounds = new Rect(0,0,0,0);
+		void OnGUI() {
+			GUI.SetNextControlName(gameObject.GetHashCode().ToString());
+			GUI.TextField(BugFixbounds, string.Empty, 0);
 		}
 	}
 }

@@ -3,26 +3,33 @@
 //   Part of: Photon Unity Networking Demos
 // </copyright>
 // <summary>
-//  Used in PUN Basics Tutorial to deal with the networked player Animator Component controls.
+//  Used in DemoAnimator to cdeal with the networked player Animator Component controls.
 // </summary>
 // <author>developer@exitgames.com</author>
 // --------------------------------------------------------------------------------------------------------------------
 
+
 using UnityEngine;
+using System.Collections;
 
-namespace Photon.Pun.Demo.PunBasics
+namespace ExitGames.Demos.DemoAnimator
 {
-	public class PlayerAnimatorManager : MonoBehaviourPun 
+	public class PlayerAnimatorManager : Photon.MonoBehaviour 
 	{
-        #region Private Fields
+		#region PUBLIC PROPERTIES
 
-        [SerializeField]
-	    private float directionDampTime = 0.25f;
-        Animator animator;
+		public float DirectionDampTime = 0.25f;
 
 		#endregion
 
-		#region MonoBehaviour CallBacks
+		#region PRIVATE PROPERTIES
+
+		Animator animator;
+	//	PhotonAnimatorView animatorView;
+
+		#endregion
+
+		#region MONOBEHAVIOUR MESSAGES
 
 		/// <summary>
 		/// MonoBehaviour method called on GameObject by Unity during initialization phase.
@@ -30,6 +37,7 @@ namespace Photon.Pun.Demo.PunBasics
 	    void Start () 
 	    {
 	        animator = GetComponent<Animator>();
+	//		animatorView = GetComponent<PhotonAnimatorView>();
 	    }
 	        
 		/// <summary>
@@ -39,7 +47,7 @@ namespace Photon.Pun.Demo.PunBasics
 	    {
 
 			// Prevent control is connected to Photon and represent the localPlayer
-	        if( photonView.IsMine == false && PhotonNetwork.IsConnected == true )
+	        if( photonView.isMine == false && PhotonNetwork.connected == true )
 	        {
 	            return;
 	        }
@@ -57,7 +65,7 @@ namespace Photon.Pun.Demo.PunBasics
             if (stateInfo.IsName("Base Layer.Run"))
             {
 				// When using trigger parameter
-                if (Input.GetButtonDown("Fire2")) animator.SetTrigger("Jump"); 
+				if (Input.GetButtonDown("Fire2")) animator.SetTrigger("Jump"); 
 			}
            
 			// deal with movement
@@ -72,7 +80,7 @@ namespace Photon.Pun.Demo.PunBasics
 
 			// set the Animator Parameters
             animator.SetFloat( "Speed", h*h+v*v );
-            animator.SetFloat( "Direction", h, directionDampTime, Time.deltaTime );
+            animator.SetFloat( "Direction", h, DirectionDampTime, Time.deltaTime );
 	    }
 
 		#endregion

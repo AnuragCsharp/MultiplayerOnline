@@ -11,7 +11,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Photon.Pun.Demo.PunBasics
+using System.Collections;
+
+namespace ExitGames.Demos.DemoAnimator
 {
 	/// <summary>
 	/// Player name input field. Let the user input his name, will appear above the player in the game.
@@ -19,10 +21,10 @@ namespace Photon.Pun.Demo.PunBasics
 	[RequireComponent(typeof(InputField))]
 	public class PlayerNameInputField : MonoBehaviour
 	{
-		#region Private Constants
+		#region Private Variables
 
 		// Store the PlayerPref Key to avoid typos
-		const string playerNamePrefKey = "PlayerName";
+		static string playerNamePrefKey = "PlayerName";
 
 		#endregion
 
@@ -33,7 +35,7 @@ namespace Photon.Pun.Demo.PunBasics
 		/// </summary>
 		void Start () {
 		
-			string defaultName = string.Empty;
+			string defaultName = "";
 			InputField _inputField = this.GetComponent<InputField>();
 
 			if (_inputField!=null)
@@ -45,7 +47,7 @@ namespace Photon.Pun.Demo.PunBasics
 				}
 			}
 
-			PhotonNetwork.NickName =	defaultName;
+			PhotonNetwork.playerName =	defaultName;
 		}
 
 		#endregion
@@ -59,14 +61,9 @@ namespace Photon.Pun.Demo.PunBasics
 		public void SetPlayerName(string value)
 		{
 			// #Important
-		    if (string.IsNullOrEmpty(value))
-		    {
-                Debug.LogError("Player Name is null or empty");
-		        return;
-		    }
-			PhotonNetwork.NickName = value;
+			PhotonNetwork.playerName = value + " "; // force a trailing space string in case value is an empty string, else playerName would not be updated.
 
-			PlayerPrefs.SetString(playerNamePrefKey, value);
+			PlayerPrefs.SetString(playerNamePrefKey,value);
 		}
 		
 		#endregion

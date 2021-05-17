@@ -10,9 +10,10 @@
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-namespace Photon.Pun.Demo.Hub
+namespace ExitGames.Demos
 {
 	/// <summary>
 	/// Present a button on all launched demos from hub to allow getting back to the demo hub.
@@ -54,9 +55,34 @@ namespace Photon.Pun.Demo.Hub
 			_canvasGroup = GetComponent<CanvasGroup>();
 
 
-	    }
-			
+			#if UNITY_5_4_OR_NEWER
+			// Unity 5.4 has a new scene management. register a method to call CalledOnLevelWasLoaded.
+			UnityEngine.SceneManagement.SceneManager.sceneLoaded += (scene, loadingMode) =>
+			{
+				this.CalledOnLevelWasLoaded(scene.buildIndex);
+			};
+			#endif
 
+
+	    }
+
+		#if !UNITY_5_4_OR_NEWER
+		/// <summary>See CalledOnLevelWasLoaded. Outdated in Unity 5.4.</summary>
+		void OnLevelWasLoaded(int level)
+		{
+			this.CalledOnLevelWasLoaded(level);
+		}
+		#endif
+		
+
+		void CalledOnLevelWasLoaded(int level)
+		{
+			Debug.Log("CalledOnLevelWasLoaded");
+			if (EventSystem.current == null)
+			{
+				Debug.LogError("no eventSystem");
+			}
+		}
 
 
 	    public void Update()

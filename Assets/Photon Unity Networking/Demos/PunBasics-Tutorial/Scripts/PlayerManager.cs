@@ -3,7 +3,7 @@
 //   Part of: Photon Unity Networking Demos
 // </copyright>
 // <summary>
-//  Used in PUN Basics Tutorial to deal with the networked player instance
+//  Used in DemoAnimator to deal with the networked player instance
 // </summary>
 // <author>developer@exitgames.com</author>
 // --------------------------------------------------------------------------------------------------------------------
@@ -11,17 +11,21 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Photon.Pun.Demo.PunBasics
+namespace ExitGames.Demos.DemoAnimator
 {
-	#pragma warning disable 649
-
     /// <summary>
     /// Player manager.
     /// Handles fire Input and Beams.
     /// </summary>
-    public class PlayerManager : MonoBehaviourPunCallbacks, IPunObservable
+    public class PlayerManager : Photon.PunBehaviour, IPunObservable
     {
-        #region Public Fields
+        #region Public Variables
+
+        [Tooltip("The Player's UI GameObject Prefab")]
+        public GameObject PlayerUiPrefab;
+
+        [Tooltip("The Beams GameObject to control")]
+        public GameObject Beams;
 
         [Tooltip("The current Health of our player")]
         public float Health = 1f;
@@ -31,15 +35,7 @@ namespace Photon.Pun.Demo.PunBasics
 
         #endregion
 
-        #region Private Fields
-
-        [Tooltip("The Player's UI GameObject Prefab")]
-        [SerializeField]
-        private GameObject playerUiPrefab;
-
-        [Tooltip("The Beams GameObject to control")]
-        [SerializeField]
-        private GameObject beams;
+        #region Private Variables
 
         //True, when the user is firing
         bool IsFiring;
@@ -53,18 +49,18 @@ namespace Photon.Pun.Demo.PunBasics
         /// </summary>
         public void Awake()
         {
-            if (this.beams == null)
+            if (this.Beams == null)
             {
                 Debug.LogError("<Color=Red><b>Missing</b></Color> Beams Reference.", this);
             }
             else
             {
-                this.beams.SetActive(false);
+                this.Beams.SetActive(false);
             }
 
             // #Important
             // used in GameManager.cs: we keep track of the localPlayer instance to prevent instanciation when levels are synchronized
-            if (photonView.IsMine)
+            if (photonView.isMine)
             {
                 LocalPlayerInstance = gameObject;
             }
@@ -83,7 +79,7 @@ namespace Photon.Pun.Demo.PunBasics
 
             if (_cameraWork != null)
             {
-                if (photonView.IsMine)
+                if (photonView.isMine)
                 {
                     _cameraWork.OnStartFollowing();
                 }
@@ -94,9 +90,9 @@ namespace Photon.Pun.Demo.PunBasics
             }
 
             // Create the UI
-            if (this.playerUiPrefab != null)
+            if (this.PlayerUiPrefab != null)
             {
-                GameObject _uiGo = Instantiate(this.playerUiPrefab);
+                GameObject _uiGo = Instantiate(this.PlayerUiPrefab) as GameObject;
                 _uiGo.SendMessage("SetTarget", this, SendMessageOptions.RequireReceiver);
             }
             else
@@ -104,18 +100,15 @@ namespace Photon.Pun.Demo.PunBasics
                 Debug.LogWarning("<Color=Red><b>Missing</b></Color> PlayerUiPrefab reference on player Prefab.", this);
             }
 
-            #if UNITY_5_4_OR_NEWER
+			#if UNITY_5_4_OR_NEWER
             // Unity 5.4 has a new scene management. register a method to call CalledOnLevelWasLoaded.
 			UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
             #endif
         }
 
 
-		public override void OnDisable()
+		public void OnDisable()
 		{
-			// Always call the base to remove callbacks
-			base.OnDisable ();
-
 			#if UNITY_5_4_OR_NEWER
 			UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
 			#endif
@@ -131,7 +124,7 @@ namespace Photon.Pun.Demo.PunBasics
         public void Update()
         {
             // we only process Inputs and check health if we are the local player
-            if (photonView.IsMine)
+            if (photonView.isMine)
             {
                 this.ProcessInputs();
 
@@ -141,9 +134,9 @@ namespace Photon.Pun.Demo.PunBasics
                 }
             }
 
-            if (this.beams != null && this.IsFiring != this.beams.activeInHierarchy)
+            if (this.Beams != null && this.IsFiring != this.Beams.GetActive())
             {
-                this.beams.SetActive(this.IsFiring);
+                this.Beams.SetActive(this.IsFiring);
             }
         }
 
@@ -155,7 +148,7 @@ namespace Photon.Pun.Demo.PunBasics
         /// </summary>
         public void OnTriggerEnter(Collider other)
         {
-            if (!photonView.IsMine)
+            if (!photonView.isMine)
             {
                 return;
             }
@@ -179,7 +172,7 @@ namespace Photon.Pun.Demo.PunBasics
         public void OnTriggerStay(Collider other)
         {
             // we dont' do anything if we are not the local player.
-            if (!photonView.IsMine)
+            if (!photonView.isMine)
             {
                 return;
             }
@@ -196,7 +189,7 @@ namespace Photon.Pun.Demo.PunBasics
         }
 
 
-        #if !UNITY_5_4_OR_NEWER
+		#if !UNITY_5_4_OR_NEWER
         /// <summary>See CalledOnLevelWasLoaded. Outdated in Unity 5.4.</summary>
         void OnLevelWasLoaded(int level)
         {
@@ -219,7 +212,7 @@ namespace Photon.Pun.Demo.PunBasics
                 transform.position = new Vector3(0f, 5f, 0f);
             }
 
-            GameObject _uiGo = Instantiate(this.playerUiPrefab);
+            GameObject _uiGo = Instantiate(this.PlayerUiPrefab) as GameObject;
             _uiGo.SendMessage("SetTarget", this, SendMessageOptions.RequireReceiver);
         }
 
@@ -231,6 +224,7 @@ namespace Photon.Pun.Demo.PunBasics
 		#if UNITY_5_4_OR_NEWER
 		void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode loadingMode)
 		{
+			
 			this.CalledOnLevelWasLoaded(scene.buildIndex);
 		}
 		#endif
@@ -266,11 +260,33 @@ namespace Photon.Pun.Demo.PunBasics
 
         #endregion
 
+        /*
+        #region IPunObservable implementation
+
+		void IPunObservable.OnPhotonSerializeView (PhotonStream stream, PhotonMessageInfo info)
+		{
+			if (stream.isWriting)
+			{
+				// We own this player: send the others our data
+				stream.SendNext(IsFiring);
+				stream.SendNext(Health);
+			}
+            else
+            {
+				// Network player, receive data
+				this.IsFiring = (bool)stream.ReceiveNext();
+				this.Health = (float)stream.ReceiveNext();
+			}
+		}
+
+        #endregion
+        */
+
         #region IPunObservable implementation
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
         {
-            if (stream.IsWriting)
+            if (stream.isWriting)
             {
                 // We own this player: send the others our data
                 stream.SendNext(this.IsFiring);

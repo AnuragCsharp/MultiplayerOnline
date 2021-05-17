@@ -3,49 +3,49 @@
 //   Part of: Photon Unity Networking Demos
 // </copyright>
 // <summary>
-//  Used in PUN Basics Tutorial to deal with the networked player instance UI display tha follows a given player to show its health and name
+//  Used in DemoAnimator to deal with the networked player instance UI display tha follows a given player to show its health and name
 // </summary>
 // <author>developer@exitgames.com</author>
 // --------------------------------------------------------------------------------------------------------------------
 
+
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Photon.Pun.Demo.PunBasics
-{
-	#pragma warning disable 649
+using System.Collections;
 
+namespace ExitGames.Demos.DemoAnimator
+{
 	/// <summary>
 	/// Player UI. Constraint the UI to follow a PlayerManager GameObject in the world,
 	/// Affect a slider and text to display Player's name and health
 	/// </summary>
-	public class PlayerUI : MonoBehaviour
-    {
-        #region Private Fields
+	public class PlayerUI : MonoBehaviour {
 
-	    [Tooltip("Pixel offset from the player target")]
-        [SerializeField]
-        private Vector3 screenOffset = new Vector3(0f, 30f, 0f);
+		#region Public Properties
 
-	    [Tooltip("UI Text to display Player's Name")]
-	    [SerializeField]
-	    private Text playerNameText;
+		[Tooltip("Pixel offset from the player target")]
+		public Vector3 ScreenOffset = new Vector3(0f,30f,0f);
 
-	    [Tooltip("UI Slider to display Player's Health")]
-	    [SerializeField]
-	    private Slider playerHealthSlider;
+		[Tooltip("UI Text to display Player's Name")]
+		public Text PlayerNameText;
 
-        PlayerManager target;
+		[Tooltip("UI Slider to display Player's Health")]
+		public Slider PlayerHealthSlider;
 
-		float characterControllerHeight;
+		#endregion
 
-		Transform targetTransform;
+		#region Private Properties
 
-		Renderer targetRenderer;
+		PlayerManager _target;
 
-	    CanvasGroup _canvasGroup;
-	    
-		Vector3 targetPosition;
+		float _characterControllerHeight = 0f;
+
+		Transform _targetTransform;
+
+		Renderer _targetRenderer;
+
+		Vector3 _targetPosition;
 
 		#endregion
 
@@ -54,12 +54,9 @@ namespace Photon.Pun.Demo.PunBasics
 		/// <summary>
 		/// MonoBehaviour method called on GameObject by Unity during early initialization phase
 		/// </summary>
-		void Awake()
-		{
+		void Awake(){
 
-			_canvasGroup = this.GetComponent<CanvasGroup>();
-			
-			this.transform.SetParent(GameObject.Find("Canvas").GetComponent<Transform>(), false);
+			this.GetComponent<Transform>().SetParent (GameObject.Find("Canvas").GetComponent<Transform>());
 		}
 
 		/// <summary>
@@ -69,15 +66,15 @@ namespace Photon.Pun.Demo.PunBasics
 		void Update()
 		{
 			// Destroy itself if the target is null, It's a fail safe when Photon is destroying Instances of a Player over the network
-			if (target == null) {
+			if (_target == null) {
 				Destroy(this.gameObject);
 				return;
 			}
 
 
 			// Reflect the Player Health
-			if (playerHealthSlider != null) {
-				playerHealthSlider.value = target.Health;
+			if (PlayerHealthSlider != null) {
+				PlayerHealthSlider.value = _target.Health;
 			}
 		}
 
@@ -88,19 +85,18 @@ namespace Photon.Pun.Demo.PunBasics
 		void LateUpdate () {
 
 			// Do not show the UI if we are not visible to the camera, thus avoid potential bugs with seeing the UI, but not the player itself.
-			if (targetRenderer!=null)
-			{
-				this._canvasGroup.alpha = targetRenderer.isVisible ? 1f : 0f;
+			if (_targetRenderer!=null) {
+				this.gameObject.SetActive(_targetRenderer.isVisible);
 			}
 			
 			// #Critical
 			// Follow the Target GameObject on screen.
-			if (targetTransform!=null)
+			if (_targetTransform!=null)
 			{
-				targetPosition = targetTransform.position;
-				targetPosition.y += characterControllerHeight;
+				_targetPosition = _targetTransform.position;
+				_targetPosition.y += _characterControllerHeight;
 				
-				this.transform.position = Camera.main.WorldToScreenPoint (targetPosition) + screenOffset;
+				this.transform.position = Camera.main.WorldToScreenPoint (_targetPosition) + ScreenOffset;
 			}
 
 		}
@@ -116,28 +112,28 @@ namespace Photon.Pun.Demo.PunBasics
 		/// Assigns a Player Target to Follow and represent.
 		/// </summary>
 		/// <param name="target">Target.</param>
-		public void SetTarget(PlayerManager _target){
+		public void SetTarget(PlayerManager target){
 
-			if (_target == null) {
-				Debug.LogError("<Color=Red><b>Missing</b></Color> PlayMakerManager target for PlayerUI.SetTarget.", this);
+			if (target == null) {
+				Debug.LogError("<Color=Red><b>Missing</b></Color> PlayMakerManager target for PlayerUI.SetTarget.",this);
 				return;
 			}
 
 			// Cache references for efficiency because we are going to reuse them.
-			this.target = _target;
-            targetTransform = this.target.GetComponent<Transform>();
-            targetRenderer = this.target.GetComponentInChildren<Renderer>();
+			_target = target;
+			_targetTransform = _target.GetComponent<Transform>();
+			_targetRenderer = _target.GetComponent<Renderer>();
 
 
-            CharacterController _characterController = this.target.GetComponent<CharacterController> ();
+			CharacterController _characterController = _target.GetComponent<CharacterController> ();
 
 			// Get data from the Player that won't change during the lifetime of this Component
 			if (_characterController != null){
-				characterControllerHeight = _characterController.height;
+				_characterControllerHeight = _characterController.height;
 			}
 
-			if (playerNameText != null) {
-                playerNameText.text = this.target.photonView.Owner.NickName;
+			if (PlayerNameText != null) {
+				PlayerNameText.text = _target.photonView.owner.NickName;
 			}
 		}
 
